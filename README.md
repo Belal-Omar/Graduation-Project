@@ -1,2 +1,2 @@
-# Graduation Project
+# Project
 
