@@ -117,10 +117,24 @@ Security and Testing: Validate API inputs, enforce access control, handle errors
 
 Subscription System: Consider adding a payment gateway and subscription plans after the core functionality is working.
 
-6. Current Project Status
+6. Admin Authentication System (Completed)
 
-The initial backend and database setup has been completed. The database models have been defined, the development environment has been configured, and basic API endpoints have been prepared for initial testing.
+An end-to-end Admin Authentication and Security Management module has been implemented:
 
-The project is still under development. Authentication, the actual scanning engine, complete vulnerability processing, report generation, and subscription management remain future tasks.
+- **Database Engine**: Built on **SQLite (`prisma/dev.db`)** using Prisma ORM (zero external database configuration required).
+- **Security & Password Hashing**: Passwords are never hardcoded. All credentials are encrypted using **bcrypt** (salt rounds = 10) and queried dynamically from the `user` table in `prisma/dev.db`.
+- **Strict Role Verification**: Enforces `role === 'ADMIN'` at both the login endpoint and on all protected API routes using JWT middleware (`requireAdminAuth`). Non-admin users are rejected with `403 Forbidden`.
+- **Audit Logging**: Every successful admin login and unauthorized attempt is logged in real-time to the SQLite `auditlog` table.
+- **Frontend Portal (Sential AI Design)**:
+  - **Admin Login UI** (`http://localhost:3000/admin/login`): Pixel-perfect implementation of the Sential AI Figma design with input validation, password toggle, status alerts, and responsive layout.
+  - **Admin Dashboard Placeholder** (`http://localhost:3000/admin/dashboard`): Protected dashboard route with JWT authentication check, displaying verified admin status and ready for the dashboard UI team.
 
-The next priority is to build and test the core scanning functionality, then connect it to the frontend and gradually add the remaining features.
+### Running and Testing the Project:
+1. Push database schema to SQLite: `npx prisma db push`
+2. Seed default admin and sample data: `npm run seed`
+3. Start development server: `npm run dev`
+4. Open browser: `http://localhost:3000/admin/login`
+
+**Default Seeded Test Accounts:**
+- **Admin Account**: `admin@scanner.local` / `graduationProject77@1` (Role: `ADMIN` -> Access Granted)
+- **Regular User**: `analyst@scanner.local` / `User@123456` (Role: `USER` -> Access Denied with 403)
