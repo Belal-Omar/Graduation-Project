@@ -85,20 +85,198 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById("loginForm").addEventListener("submit", (e) => {
-            e.preventDefault();
-            const email = document.getElementById("email").value;
-            
-            // حفظ بيانات وهمية للـ LocalStorage لتجربة السلوك
-            const userData = { name: email.split('@')[0], email: email };
-            localStorage.setItem("token", "dummy-jwt-token-12345");
-            localStorage.setItem("user", JSON.stringify(userData));
+    
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.message || "Login failed. Please check your details.");
+                return;
+            }
+
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
 
             alert("Logged in successfully!");
-            window.location.href = "index.html"; // التوجيه للصفحة الرئيسية
-        });
-    </script>
+         window.location.href = "/";
 
+        } catch (error) {
+            alert("Cannot connect to the server. Please try again.");
+        }
+    });
+</script>
 </body>
 </html>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
