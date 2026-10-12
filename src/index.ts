@@ -9,6 +9,7 @@ import path from 'path';
 import { prisma } from './config/db';
 
 import { adminRouter } from './routes/admin.routes';
+import { authRouter } from './routes/auth.routes';
 
 const app = express();
 
@@ -20,13 +21,40 @@ app.use(express.urlencoded({ extended: true }));
 
 const publicDir = path.join(process.cwd(), 'public');
 
-app.use(express.static(publicDir));
 
 app.get('/', (req: Request, res: Response) => {
-
-  res.redirect('/admin/login');
-
+  res.sendFile(path.join(process.cwd(), 'index.html'));
 });
+
+
+
+app.use(express.static(publicDir));
+
+
+
+
+
+app.get('/login.html', (req: Request, res: Response) => {
+    res.sendFile(path.join(process.cwd(), 'login.html'));
+});
+app.get('/signup.html', (req: Request, res: Response) => {
+    res.sendFile(path.join(process.cwd(), 'signup.html'));
+});
+
+app.get('/style.css', (req: Request, res: Response) => {
+    res.sendFile(path.join(process.cwd(), 'style.css'));
+});
+
+
+
+
+
+
+
+
+
+
+
 
 app.get('/admin', (req: Request, res: Response) => {
 
@@ -55,6 +83,7 @@ app.get('/admin/Admin-management', (req: Request, res: Response) => {
 });
 
 app.use('/api/admin', adminRouter);
+app.use('/api/auth', authRouter);
 
 app.get('/api/health', async (req: Request, res: Response) => {
 

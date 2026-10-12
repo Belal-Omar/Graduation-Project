@@ -1,5 +1,7 @@
+
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { prisma } from '../config/db';
 
 export interface AuthUserPayload {
   id: number;
@@ -12,9 +14,11 @@ export interface AuthenticatedRequest extends Request {
   user?: AuthUserPayload;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'vuln_scanner_admin_super_secret_jwt_key_2026';
-
-export const requireAdminAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+export const requireAdminAuth = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -25,26 +29,91 @@ export const requireAdminAuth = (req: AuthenticatedRequest, res: Response, next:
     return;
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.slice(7).trim();
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    res.status(500).json({
+      success: false,
+      error: 'Authentication is not configured on the server.',
+    });
+    return;
+  }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthUserPayload;
+    const decoded = jwt.verify(token, secret);
 
-    // Strict validation: Verify that the user has the 'ADMIN' role
-    if (!decoded.role || decoded.role.toUpperCase() !== 'ADMIN') {
+    if (
+      typeof decoded === 'string' ||
+      typeof decoded.id !== 'number' ||
+      typeof decoded.role !== 'string' ||
+      decoded.role.toUpperCase() !== 'ADMIN'
+    ) {
       res.status(403).json({
         success: false,
-        error: 'Access denied: Administrator privileges required (role must be admin).',
+        error: 'Administrator privileges required.',
       });
       return;
     }
 
-    req.user = decoded;
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+      },
+    });
+
+    if (!user || !user.isActive) {
+      res.status(403).json({
+        success: false,
+        error: 'Account not found or deactivated.',
+      });
+      return;
+    }
+
+    if (user.role.toUpperCase() !== 'ADMIN') {
+      res.status(403).json({
+        success: false,
+        error: 'Administrator privileges required.',
+      });
+      return;
+    }
+
+    req.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({
       success: false,
       error: 'Invalid or expired token. Please log in again.',
     });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
