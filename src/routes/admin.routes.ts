@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+﻿import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/db';
@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'vuln_scanner_admin_super_secret_jw
 /**
  * POST /api/admin/login
  * Admin Login Endpoint
- * - Verifies user against the Database (SQLite dev.db)
+ * - Verifies user against the Database (MySQL on XAMPP)
  * - Verifies password using bcrypt hash
  * - Strictly enforces: user.role === 'ADMIN'
  * - Records login in AuditLog table
@@ -179,45 +179,284 @@ adminRouter.get('/stats', requireAdminAuth, async (req: AuthenticatedRequest, re
 
     res.json({
       success: true,
-      stats: {
-        totalUsers: userCount,
-        totalProjects: projectCount,
-        totalTargets: targetCount,
-        totalScans: scanCount,
-        totalVulnerabilities: vulnCount,
-        database: 'SQLite (prisma/dev.db)',
-      },
+    stats: {
+  totalUsers: userCount,
+  totalAdmin: await prisma.user.count({
+    where: { role: 'ADMIN' },
+  }),
+  totalProjects: projectCount,
+  totalTargets: targetCount,
+  totalScans: scanCount,
+  totalVulnerabilities: vulnCount,
+  database: 'MySQL (XAMPP)',
+},
     });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch admin stats.' });
   }
 });
-
 /**
+
  * GET /api/admin/users
- * Returns list of all registered users in database
+
+ * Returns list of administrators only
+
  */
+
 adminRouter.get('/users', requireAdminAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
   try {
+
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        isActive: true,
-        lastLoginAt: true,
-        createdAt: true,
+
+      where: {
+
+        role: 'ADMIN',
+
       },
+
+      select: {
+
+        id: true,
+
+        name: true,
+
+        email: true,
+
+        role: true,
+
+        isActive: true,
+
+        lastLoginAt: true,
+
+        createdAt: true,
+
+      },
+
       orderBy: { id: 'asc' },
+
     });
 
     res.json({ success: true, users });
+
   } catch (error) {
-    res.status(500).json({ success: false, error: 'Failed to fetch users list.' });
+
+    res.status(500).json({ success: false, error: 'Failed to fetch admin list.' });
+
   }
+
 });
 
+adminRouter.patch(
+
+  '/users/:id/status',
+
+  requireAdminAuth,
+
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+    try {
+
+      const userId = Number(req.params.id);
+
+      const { isActive } = req.body;
+
+      const currentAdminId = req.user?.id;
+
+      if (!Number.isSafeInteger(userId) || userId <= 0) {
+
+        res.status(400).json({
+
+          success: false,
+
+          error: 'Invalid user ID.',
+
+        });
+
+        return;
+
+      }
+
+      if (typeof isActive !== 'boolean') {
+
+        res.status(400).json({
+
+          success: false,
+
+          error: 'isActive must be true or false.',
+
+        });
+
+        return;
+
+      }
+
+      if (!currentAdminId) {
+
+        res.status(401).json({
+
+          success: false,
+
+          error: 'Administrator identity is missing.',
+
+        });
+
+        return;
+
+      }
+
+      if (userId === currentAdminId && !isActive) {
+
+        res.status(400).json({
+
+          success: false,
+
+          error: 'You cannot deactivate your own account.',
+
+        });
+
+        return;
+
+      }
+
+      const targetUser = await prisma.user.findUnique({
+
+        where: { id: userId },
+
+        select: {
+
+          id: true,
+
+          name: true,
+
+          role: true,
+
+          isActive: true,
+
+        },
+
+      });
+
+      if (!targetUser) {
+
+        res.status(404).json({
+
+          success: false,
+
+          error: 'User not found.',
+
+        });
+
+        return;
+
+      }
+
+      if (targetUser.isActive === isActive) {
+
+        res.json({
+
+          success: true,
+
+          message: 'User status is already up to date.',
+
+        });
+
+        return;
+
+      }
+
+      if (
+
+        !isActive &&
+
+        targetUser.role.toUpperCase() === 'ADMIN' &&
+
+        targetUser.isActive
+
+      ) {
+
+        const activeAdminCount = await prisma.user.count({
+
+          where: {
+
+            role: { equals: 'ADMIN' },
+
+            isActive: true,
+
+          },
+
+        });
+
+        if (activeAdminCount <= 1) {
+
+          res.status(400).json({
+
+            success: false,
+
+            error: 'Cannot deactivate the last active administrator.',
+
+          });
+
+          return;
+
+        }
+
+      }
+
+      await prisma.$transaction([
+
+        prisma.user.update({
+
+          where: { id: userId },
+
+          data: {
+
+            isActive,
+
+            updatedAt: new Date(),
+
+          },
+
+        }),
+
+        prisma.auditLog.create({
+
+          data: {
+
+            userId: currentAdminId,
+
+            action: isActive ? 'USER_ACTIVATED' : 'USER_DEACTIVATED',
+
+            details: `Administrator changed account status for user ID ${userId} (${targetUser.name}) to ${isActive ? 'Active' : 'Inactive'}.`,
+
+          },
+
+        }),
+
+      ]);
+
+      res.json({
+
+        success: true,
+
+        
+      });
+
+    } catch (error) {
+
+      console.error('Update user status error:', error);
+
+      res.status(500).json({
+
+        success: false,
+
+        error: 'Failed to update user status.',});
+
+    }
+
+  }
+
+);
 /**
  * GET /api/admin/audit-logs
  * Returns audit logs stored in the database
@@ -243,7 +482,133 @@ adminRouter.get('/audit-logs', requireAdminAuth, async (req: AuthenticatedReques
     res.status(500).json({ success: false, error: 'Failed to fetch audit logs.' });
   }
 });
+/**
 
+ * POST /api/admin/create-admin
+
+ * Create a new administrator account
+
+ */
+
+adminRouter.post(
+
+  '/create-admin',
+
+  requireAdminAuth,
+
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+    try {
+
+      const { name, email, password } = req.body;
+
+      if (!name?.trim() || !email?.trim() || !password) {
+
+        res.status(400).json({
+
+          success: false,
+
+          error: 'Name, email, and password are required.',
+
+        });
+
+        return;
+
+      }
+
+      if (password.length < 8) {
+
+        res.status(400).json({
+
+          success: false,
+
+          error: 'Password must be at least 8 characters.',
+
+        });
+
+        return;
+
+      }
+
+      const normalizedEmail = email.trim().toLowerCase();
+
+      const existingUser = await prisma.user.findUnique({
+
+        where: { email: normalizedEmail },
+
+      });
+
+      if (existingUser) {
+
+        res.status(409).json({
+
+          success: false,
+
+          error: 'This email is already registered.',
+
+        });
+
+        return;
+
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      const newAdmin = await prisma.user.create({
+
+        data: {
+
+          name: name.trim(),
+
+          email: normalizedEmail,
+
+          passwordHash,
+
+          role: 'ADMIN',
+
+          updatedAt: new Date(),
+
+        },
+
+        select: {
+
+          id: true,
+
+          name: true,
+
+          email: true,
+
+          role: true,
+
+        },
+
+      });
+
+      res.status(201).json({
+
+        success: true,
+
+        message: 'Admin created successfully.',
+
+        user: newAdmin,
+
+      });
+
+    } catch (error) {
+
+      console.error('Create Admin Error:', error);
+
+      res.status(500).json({
+
+        success: false,
+
+        error: 'Failed to create admin account.',});
+
+    }
+
+  }
+
+);
 /**
  * POST /api/admin/logout
  * Records logout event
@@ -255,7 +620,7 @@ adminRouter.post('/logout', requireAdminAuth, async (req: AuthenticatedRequest, 
         data: {
           userId: req.user.id,
           action: 'ADMIN_LOGOUT',
-          details: `Admin ${req.user.name} logged out.`,
+         details: 'Admin ${req.user.name} logged out.',
         },
       });
     }
@@ -264,3 +629,4 @@ adminRouter.post('/logout', requireAdminAuth, async (req: AuthenticatedRequest, 
     res.status(500).json({ success: false, error: 'Logout failed.' });
   }
 });
+
