@@ -36,7 +36,6 @@
             border-radius: 6px;
             font-size: 14px;
             outline: none;
-            box-sizing: border-box;
         }
         .form-group input:focus {
             border-color: #2563eb;
@@ -55,10 +54,6 @@
         .submit-btn:hover {
             background-color: #1d4ed8;
         }
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
         .auth-footer {
             margin-top: 15px;
             font-size: 14px;
@@ -68,152 +63,366 @@
             color: #2563eb;
             text-decoration: none;
         }
-        .error-msg {
-            background: #fef2f2;
-            border: 1px solid #fee2e2;
-            color: #991b1b;
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            margin-bottom: 15px;
-            display: none;
-            text-align: left;
-        }
-        .error-msg.show {
-            display: block;
-        }
     </style>
 </head>
 <body>
 
     <div class="auth-container">
         <h2>Create Account</h2>
-
-        <div class="error-msg" id="errorMsg"></div>
-
         <form id="signupForm">
             <div class="form-group">
                 <label for="name">Full Name</label>
-                <input
-                    type="text"
-                    id="name"
-                    required
-                    minlength="3"
-                    placeholder="Nouran"
-                >
+                <input type="text" id="name" required placeholder="Nouran">
             </div>
-
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input
-                    type="email"
-                    id="email"
-                    required
-                    placeholder="name@example.com"
-                >
+                <input type="email" id="email" required placeholder="name@example.com">
             </div>
-
             <div class="form-group">
                 <label for="password">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    required
-                    minlength="8"
-                    placeholder="At least 8 characters"
-                >
+                <input type="password" id="password" required placeholder="••••••••">
             </div>
-
-            <div class="form-group">
-                <label for="confirm">Confirm Password</label>
-                <input
-                    type="password"
-                    id="confirm"
-                    required
-                    minlength="8"
-                    placeholder="••••••••"
-                >
-            </div>
-
-            <button type="submit" class="submit-btn" id="submitBtn">
-                Sign Up
-            </button>
+            <button type="submit" class="submit-btn">Sign Up</button>
         </form>
-
         <div class="auth-footer">
-            Already have an account?
-            <a href="/login.html">Log in</a>
+            Already have an account? <a href="login.html">Log in</a>
         </div>
     </div>
 
-    <script>
-        const form = document.getElementById("signupForm");
-        const errorMsg = document.getElementById("errorMsg");
-        const submitBtn = document.getElementById("submitBtn");
+    
+        
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            errorMsg.classList.remove("show");
 
-            const name = document.getElementById("name").value.trim();
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value;
-            const confirm = document.getElementById("confirm").value;
+<script>
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            if (password !== confirm) {
-                errorMsg.textContent = "Passwords do not match.";
-                errorMsg.classList.add("show");
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("/api/auth/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.message || "Sign up failed.");
                 return;
             }
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Creating account...";
+            alert("Account created successfully!");
+            window.location.href = "/login.html";
 
-            try {
-                const response = await fetch("/api/auth/signup", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        name,
-                        email,
-                        password,
-                        confirm
-                    })
-                });
+        } catch (error) {
+            alert("Cannot connect to the server. Please try again.");
+        }
+    });
+</script>
+</body>
+</html>
 
-                const data = await response.json();
 
-                if (response.ok && data.success) {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
-                    sessionStorage.removeItem("token");
-                    sessionStorage.removeItem("user");
 
-                    window.location.replace("/login.html");
-                    return;
-                }
 
-                errorMsg.textContent =
-                    data.error || "Signup failed. Please try again.";
 
-                errorMsg.classList.add("show");
 
-            } catch (err) {
-                console.error("Signup Error:", err);
 
-                errorMsg.textContent =
-                    "Server connection error. Please make sure the backend is running.";
 
-                errorMsg.classList.add("show");
 
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Sign Up";
-            }
-        });
-    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </body>
 </html>
