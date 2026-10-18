@@ -23,7 +23,7 @@ const publicDir = path.join(process.cwd(), 'public');
 app.use(express.static(publicDir));
 
 app.get('/', (req: Request, res: Response) => {
-  res.redirect('/admin/login');
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 app.get('/admin', (req: Request, res: Response) => {
@@ -42,18 +42,20 @@ app.get('/admin/add-admin', (req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'admin', 'add-admin.html'));
 });
 
-app.get('/admin/Admin-management', (req: Request, res: Response) => {
-  res.sendFile(
-    path.join(publicDir, 'admin', 'admin-management.html')
-  );
+app.get(['/admin/Admin-management', '/admin/admin-management'], (req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'admin', 'Admin-management.html'));
 });
 
-app.get('/login.html', (req: Request, res: Response) => {
+app.get(['/login', '/login.html'], (req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'login.html'));
 });
 
-app.get('/signup.html', (req: Request, res: Response) => {
+app.get(['/signup', '/signup.html'], (req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'signup.html'));
+});
+
+app.get(['/dashboard', '/dashboard.html'], (req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'dashboard.html'));
 });
 
 app.use('/api/admin', adminRouter);
@@ -64,14 +66,14 @@ app.get('/api/health', async (req: Request, res: Response) => {
     await prisma.$queryRaw`SELECT 1`;
     res.json({
       status: 'success',
-      database: 'MySQL (XAMPP)',
-      message: 'Backend is connected to MySQL Database on XAMPP successfully!',
+      database: 'SQLite (prisma/dev.db)',
+      message: 'Backend is connected to SQLite Database successfully!',
       timestamp: new Date(),
     });
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      database: 'MySQL (XAMPP)',
+      database: 'SQLite (prisma/dev.db)',
       message: 'Database connection failed',
       error: (error as Error).message,
     });
@@ -133,6 +135,6 @@ app.listen(port, () => {
   console.log(`👤 User Signup: http://localhost:${port}/signup.html`);
   console.log(`👤 User Login: http://localhost:${port}/login.html`);
   console.log(`👉 Database Health Check: http://localhost:${port}/api/health`);
-  console.log('🗄️ MySQL database: vuln_scanner');
+  console.log('🗄️ Database Engine: SQLite (prisma/dev.db)');
   console.log('======================================================\n');
 });
