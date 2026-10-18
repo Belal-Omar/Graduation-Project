@@ -1,4 +1,4 @@
-﻿import { Router, Response } from 'express';
+import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/db';
@@ -629,4 +629,3 @@ adminRouter.post('/logout', requireAdminAuth, async (req: AuthenticatedRequest, 
     res.status(500).json({ success: false, error: 'Logout failed.' });
   }
 });
-

@@ -121,19 +121,20 @@ Subscription System: Consider adding a payment gateway and subscription plans af
 
 An end-to-end Admin Authentication and Security Management module has been implemented:
 
-- **Database Engine**: Built on **SQLite (`prisma/dev.db`)** using Prisma ORM (zero external database configuration required).
-- **Security & Password Hashing**: Passwords are never hardcoded. All credentials are encrypted using **bcrypt** (salt rounds = 10) and queried dynamically from the `user` table in `prisma/dev.db`.
+- **Database Engine**: Migrated from SQLite to **MySQL on XAMPP (Port 3306)** using Prisma ORM.
+- **Security & Password Hashing**: Passwords are never hardcoded. All credentials are encrypted using **bcrypt** (salt rounds = 10) and queried dynamically from the MySQL `user` table.
 - **Strict Role Verification**: Enforces `role === 'ADMIN'` at both the login endpoint and on all protected API routes using JWT middleware (`requireAdminAuth`). Non-admin users are rejected with `403 Forbidden`.
-- **Audit Logging**: Every successful admin login and unauthorized attempt is logged in real-time to the SQLite `auditlog` table.
-- **Frontend Portal (Sential AI Design)**:
-  - **Admin Login UI** (`http://localhost:3000/admin/login`): Pixel-perfect implementation of the Sential AI Figma design with input validation, password toggle, status alerts, and responsive layout.
-  - **Admin Dashboard Placeholder** (`http://localhost:3000/admin/dashboard`): Protected dashboard route with JWT authentication check, displaying verified admin status and ready for the dashboard UI team.
+- **Audit Logging**: Every successful admin login and unauthorized attempt is logged in real-time to the MySQL `auditlog` table.
+- **Frontend Portal**:
+  - **Admin Login UI** (`http://localhost:3000/admin/login`): Cybersecurity dark-themed portal with input validation, password toggle, status alerts, and demo fill helpers.
+  - **Admin Dashboard** (`http://localhost:3000/admin/dashboard`): Displays live XAMPP MySQL connectivity, overview metrics, registered users table, and system audit trail.
 
 ### Running and Testing the Project:
-1. Push database schema to SQLite: `npx prisma db push`
-2. Seed default admin and sample data: `npm run seed`
-3. Start development server: `npm run dev`
-4. Open browser: `http://localhost:3000/admin/login`
+1. Ensure **MySQL** is started in your **XAMPP Control Panel**.
+2. Push database schema to MySQL: `npm run prisma:push` (or `npx prisma db push`).
+3. Seed default admin and sample data: `npm run seed`.
+4. Start development server: `npm run dev`.
+5. Open browser: `http://localhost:3000/admin/login`.
 
 **Default Seeded Test Accounts:**
 - **Admin Account**: `admin@scanner.local` / `graduationProject77@1` (Role: `ADMIN` -> Access Granted)

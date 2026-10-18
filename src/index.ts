@@ -66,10 +66,8 @@ app.get('/api/health', async (req: Request, res: Response) => {
 
       status: 'success',
 
-      database: 'MySQL (XAMPP)',
-
-      message: 'Backend is connected to MySQL Database on XAMPP successfully!',
-
+     database: 'SQLite',
+           message: 'Backend is connected to SQLite successfully!',
       timestamp: new Date(),
 
     });

@@ -5,3 +5,24 @@ node_modules/
 dist/
 build/
 coverage/
+
+# Local databases and backups
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sql
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local archives
+node_modules.rar
+
+# Temporary import script
+import_mysql_to_sqlite_test.py
+
+# Local backup and diagnostic files
+prisma/schema.mysql-backup-20261018-193933.prisma
+check_databases.py
