@@ -3,91 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SentinelAI</title>
+    <title>Sign In &bull; Sential AI</title>
     <link rel="stylesheet" href="style.css">
-
     <style>
-        .auth-container {
-            max-width: 400px;
-            margin: 80px auto;
-            padding: 30px;
+        .auth-wrapper {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: radial-gradient(circle at 50% 30%, rgba(239, 246, 255, 0.8) 0%, #ffffff 70%);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-card);
+            border-radius: 20px;
+            padding: 40px 36px;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.7);
             text-align: center;
         }
 
-        .auth-container h2 {
-            margin-bottom: 20px;
-            color: #0f172a;
+        .auth-header-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .auth-card h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--navy-dark);
+            letter-spacing: -0.6px;
+            margin-bottom: 8px;
+        }
+
+        .auth-card p.auth-subtitle {
+            font-size: 14.5px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: left;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #475569;
+            margin-bottom: 7px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--navy-dark);
         }
 
         .form-group input {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 12px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            font-size: 14.5px;
             outline: none;
-            box-sizing: border-box;
+            transition: var(--transition-smooth);
+            background: #fafbfc;
         }
 
         .form-group input:focus {
-            border-color: #2563eb;
+            border-color: var(--primary-blue);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         .submit-btn {
             width: 100%;
-            padding: 12px;
-            background-color: #2563eb;
-            color: white;
+            padding: 13px;
+            background: var(--primary-blue);
+            color: #ffffff;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 15px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
+            box-shadow: var(--shadow-button);
+            transition: var(--transition-smooth);
+            margin-top: 6px;
         }
 
         .submit-btn:hover {
-            background-color: #1d4ed8;
+            background: var(--primary-blue-hover);
+            transform: translateY(-1px);
         }
 
         .submit-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.65;
             cursor: not-allowed;
+            transform: none;
         }
 
         .auth-footer {
-            margin-top: 15px;
+            margin-top: 24px;
             font-size: 14px;
-            color: #64748b;
+            color: var(--text-muted);
         }
 
         .auth-footer a {
-            color: #2563eb;
-            text-decoration: none;
+            color: var(--primary-blue);
+            font-weight: 600;
         }
 
         .error-msg {
-            background: #fef2f2;
-            border: 1px solid #fee2e2;
-            color: #991b1b;
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            margin-bottom: 15px;
+            background: var(--accent-red-bg);
+            border: 1px solid #fecaca;
+            color: var(--accent-red-text);
+            padding: 11px 14px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            margin-bottom: 20px;
             display: none;
             text-align: left;
         }
@@ -97,47 +131,54 @@
         }
     </style>
 </head>
-
 <body>
 
-    <div class="auth-container">
-        <h2>Welcome Back</h2>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="navbar">
+            <a href="index.html" class="logo">
+                <div class="logo-icon-box">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </div>
+                <div class="logo-name">
+                    Sential <span class="logo-name-ai">AI</span>
+                </div>
+            </a>
 
-        <div class="error-msg" id="errorMsg"></div>
-
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input
-                    type="email"
-                    id="email"
-                    required
-                    placeholder="name@example.com"
-                >
+            <div class="nav-actions">
+                <span style="font-size: 14px; color: var(--text-muted);">Don't have an account?</span>
+                <a href="signup.html" class="btn-start-free">Sign Up ↗</a>
             </div>
+        </div>
+    </header>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    required
-                    placeholder="••••••••"
-                >
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <h2>Welcome Back</h2>
+            <p class="auth-subtitle">Sign in to access your security telemetry & scans.</p>
+
+            <div class="error-msg" id="errorMsg"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Work Email</label>
+                    <input type="email" id="email" required placeholder="name@company.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Sign In →</button>
+            </form>
+
+            <div class="auth-footer">
+                Need an account? <a href="/signup.html">Create one for free</a>
             </div>
-
-            <button
-                type="submit"
-                class="submit-btn"
-                id="submitBtn"
-            >
-                Sign In
-            </button>
-        </form>
-
-        <div class="auth-footer">
-            Don't have an account?
-            <a href="/signup.html">Sign up</a>
         </div>
     </div>
 
@@ -148,68 +189,48 @@
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
-
             errorMsg.classList.remove("show");
 
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
 
             submitBtn.disabled = true;
-            submitBtn.textContent = "Signing in...";
+            submitBtn.textContent = "Authenticating...";
 
             try {
                 const response = await fetch("/api/auth/login", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        email,
-                        password
-                    })
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok && data.success && data.user) {
                     localStorage.setItem("token", data.token);
-                    localStorage.setItem(
-                        "user",
-                        JSON.stringify(data.user)
-                    );
+                    localStorage.setItem("user", JSON.stringify(data.user));
 
-                    const role = String(
-                        data.user.role || ""
-                    ).toUpperCase();
-
+                    const role = String(data.user.role || "").toUpperCase();
                     if (role === "ADMIN") {
                         window.location.replace("/admin/dashboard");
                     } else {
                         window.location.replace("/dashboard.html");
                     }
-
                     return;
                 }
 
-                errorMsg.textContent =
-                    data.error || "Login failed. Please try again.";
-
+                errorMsg.textContent = data.error || "Login failed. Please check your credentials.";
                 errorMsg.classList.add("show");
 
             } catch (err) {
                 console.error("Login Error:", err);
-
-                errorMsg.textContent =
-                    "Server connection error. Please make sure the backend is running.";
-
+                errorMsg.textContent = "Server connection error. Please make sure the backend is active.";
                 errorMsg.classList.add("show");
-
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Sign In";
+                submitBtn.textContent = "Sign In →";
             }
         });
     </script>
-
 </body>
 </html>
